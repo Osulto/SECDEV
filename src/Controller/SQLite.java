@@ -11,7 +11,38 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+
 public class SQLite {
+    
+    private Connection conn;
+
+    public SQLite() {
+        try {
+            // 2. Initialize the connection in the constructor
+            String url = "jdbc:sqlite:database.db"; // Path to your database file
+            this.conn = DriverManager.getConnection(url);
+            System.out.println("Connection to SQLite has been established.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public String getUserHash(String username) {
+        String query = "SELECT password FROM users WHERE username = ?";
+        try (PreparedStatement stmt = this.conn.prepareStatement(query)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("password");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // Return null if user not found or on error
+    }
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";

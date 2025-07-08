@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import javax.swing.WindowConstants;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class Frame extends javax.swing.JFrame {
 
@@ -256,8 +257,20 @@ public class Frame extends javax.swing.JFrame {
         frameView.show(Container, "registerPnl");
     }
     
-    public void registerAction(String username, String password, String confpass){
-        main.sqlite.addUser(username, password);
+    public void registerAction(String username, char[] password, char[] confpass){
+        // 1. Create a password encoder
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        // 2. Hash the password. BCrypt handles the char[] to String conversion securely.
+        String hashedPassword = encoder.encode(new String(password));
+
+        // 3. Securely clear the original password arrays from memory
+        java.util.Arrays.fill(password, ' ');
+        java.util.Arrays.fill(confpass, ' ');
+
+        // 4. Call the addUser method with the HASHED password.
+        // The method signature in SQLite.java can remain as (String, String)
+        main.sqlite.addUser(username, hashedPassword);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
